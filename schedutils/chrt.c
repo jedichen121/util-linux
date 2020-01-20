@@ -112,6 +112,10 @@ static int sched_getattr(pid_t pid, struct sched_attr *attr, unsigned int size, 
 # define SCHED_DEADLINE 6
 #endif
 
+#if defined (__linux__) && !defined(SCHED_TT)
+#define SCHED_TT		7
+#endif
+
 /* control struct */
 struct chrt_ctl {
 	pid_t	pid;
@@ -149,6 +153,7 @@ static void __attribute__((__noreturn__)) usage(void)
 	fputs(_(" -i, --idle           set policy to SCHED_IDLE\n"), out);
 	fputs(_(" -o, --other          set policy to SCHED_OTHER\n"), out);
 	fputs(_(" -r, --rr             set policy to SCHED_RR (default)\n"), out);
+    fputs(_(" -t, --tt             set policy to SCHED_TT\n"), out);
 
 	fputs(USAGE_SEPARATOR, out);
 	fputs(_("Scheduling options:\n"), out);
@@ -197,6 +202,10 @@ static const char *get_policy_name(int policy)
 #ifdef SCHED_DEADLINE
 	case SCHED_DEADLINE:
 		return "SCHED_DEADLINE";
+#endif
+#ifdef SCHED_TT
+	case SCHED_TT:
+		return "SCHED_TT";
 #endif
 	default:
 		break;
@@ -321,6 +330,9 @@ static void show_min_max(void)
 #endif
 #ifdef SCHED_DEADLINE
 		SCHED_DEADLINE,
+#endif
+#ifdef SCHED_TT
+		SCHED_TT,
 #endif
 	};
 
@@ -451,6 +463,11 @@ int main(int argc, char **argv)
 		case 'd':
 #ifdef SCHED_DEADLINE
 			ctl->policy = SCHED_DEADLINE;
+#endif
+			break;
+		case 't':
+#ifdef SCHED_TT
+			ctl->policy = SCHED_TT;
 #endif
 			break;
 		case 'f':
